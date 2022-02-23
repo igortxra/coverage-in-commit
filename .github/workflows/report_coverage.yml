@@ -1,0 +1,23 @@
+name: Report test coverage
+
+on: 
+  push:
+    branches: [main]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v2
+      - name: python setup
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Requirements instalation
+        run: |
+          pip install -r requirements.txt
+      - name: Test run
+        run: |
+          coverage run -m pytest -v
+          coverage report --omit=*_test.py
