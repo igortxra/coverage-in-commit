@@ -20,4 +20,43 @@ jobs:
       - name: Test run
         run: |
           coverage run -m pytest -v
-          coverage report --omit=*_test.py
+      - name: Test coverage report
+        id: coverage
+        run: |
+          output=$(python3 -m coverage report --omit=*_test.py)
+          parse_title=true
+
+          output_table_title=''
+          output_table_contents=''
+          cont=0
+
+          for x in $output; do
+            if [[ $x =~ ^-+ ]]; then
+              if [[ "$parse_title" = true ]];then 
+                output_table_contents+="\n|-|-|-|-|\n"
+                parse_title=false
+              fi
+            else
+              if [[ "$parse_title" = true ]];then
+              output_table_contents+="$x|"
+            else
+              if [[ $cont == 4 ]];then
+                cont=0
+                output_table_contents+="\n"
+              fi
+                output_table_contents+="$x|"
+                cont=$((cont+1)) 
+              fi
+            fi            
+          done
+          echo -en $output_table_contents > coverage.log
+          REPORT="$(cat coverage.log)"
+          REPORT="${REPORT//'%'/'%25'}"
+          REPORT="${REPORT//$'\n'/'%0A'}"
+          REPORT="${REPORT//$'\r'/'%0D'}"
+          echo "::set-output name=report::$REPORT"
+          
+      - name: Create commit message
+        uses: peter-evans/commit-comment@v1
+        with:
+          body: ${{ steps.coverage.outputs.report }}
