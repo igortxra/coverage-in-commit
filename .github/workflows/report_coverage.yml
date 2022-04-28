@@ -20,9 +20,8 @@ jobs:
       - name: Test run
         run: |
           coverage run -m pytest -v
-      - name: Test coverage report
       - id: md
-      - uses: igortxra/pytest-coverage-action@main
+        uses: igortxra/pytest-coverage-action@main
       - name: Create commit message
         uses: peter-evans/commit-comment@v1
         with:
